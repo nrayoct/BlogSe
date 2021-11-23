@@ -1,47 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
+<?= $this->extend('/layout/template'); ?>
+<?= $this->section('content'); ?>
 
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
-    <script src="//js.nicedit.com/nicEdit-latest.js" type="text/javascript"></script>
-    <script type="text/javascript">
-        bkLib.onDomLoaded(nicEditors.allTextAreas);
-    </script>
-    <title>Blog - Blogs</title>
-</head>
-
-<body>
-    <div class="container-fluid">
-        <ul class="nav nav-tabs">
-            <li class="nav-item">
-                <a class="nav-link <?= \Config\Services::request()->uri->getSegment(1) == '' ? 'active' : '' ?> " aria-current="page" href="/">Home</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link <?= \Config\Services::request()->uri->getSegment(1) == 'blogs' ? 'active' : '' ?>" href="/blogs">Blog</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link <?= \Config\Services::request()->uri->getSegment(1) == 'about' ? 'active' : '' ?>" href="/about">About</a>
-            </li>
-        </ul>
-    </div>
-
-    <!-- Optional JavaScript; choose one of the two! -->
-
-    <!-- Option 1: Bootstrap Bundle with Popper -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
-
-    <!-- Option 2: Separate Popper and Bootstrap JS -->
-    <!--
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js" integrity="sha384-7+zCNj/IqJ95wo16oMtfsKbZ9ccEh31eOz1HGyDuCQ6wgnyJNSYdrPa03rtR1zdB" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js" integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13" crossorigin="anonymous"></script>
-    -->
-
+<div class="container my-5">
     <h1>KUMPULAN ARTIKEL BLOG SEDERHANA</h1>
-    <hr>
     <div class="d-grid gap-2 d-md-flex justify-content-md-center">
         <a href="/blogs/tambahblog"><button type="button" class="btn btn-primary">Tambah Posting</button></a>
     </div>
@@ -56,7 +17,8 @@
     }
     ?>
     <br>
-    <table class="table table-hover">
+
+    <table class="table table-hover" width="1000px" cellpadding="8" cellspacing="0">
         <thead>
             <th>No</th>
             <th>Judul</th>
@@ -77,7 +39,7 @@
                     <td><?= $blog['created_at']; ?></td>
                     <td><?= $blog['updated_at']; ?></td>
                     <td>
-                        <a href="/blogs/edit/<?= $blog['slug'] ?>" class="btn btn-outline-primary"> Edit </a>
+                        <a href="/blogs/edit/<?= $blog['slug'] ?>" class="btn btn-sm btn-warning me-1"></i> Edit </a>
                         <form action="/blogs/<?= $blog['slug'] ?>" method="post" class="d-inline">
                             <?= csrf_field(); ?>
                             <input type="hidden" name="_method" value="DELETE">
@@ -96,7 +58,11 @@
         function hapus(blog_id) {
             message = confirm('Apakah Anda Yakin Ingin Menghapus Postingan Ini? Postingan Akan Terhapus Permanen');
             if (message) {
-                window.location.href = ("<?= site_url('blogs/hapus/') ?>") + blog_id;
+                window.location.href = ("<?= site_url('blogs/hapus/') ?>") + slug;
             } else return false;
         }
     </script>
+
+</div>
+
+<?= $this->endSection(); ?>

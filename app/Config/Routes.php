@@ -40,15 +40,22 @@ $routes->get('/about', function () {
         'title' => "Blog - About"
     ];
     //closure : ini kalo ga ada controller
-    echo view('layout/header', $data);
-    echo view('v_about');
-    echo view('layout/footer');
+    echo view('v_about', $data);
 });
 $routes->get('/blogs/tambahblog', 'BlogsController::tambahblog');
 $routes->delete('/blogs/(:any)', 'BlogsController::delete/$1');
 $routes->post('/blogs/postingblog', 'BlogsController::posting');
 $routes->get('/blogs/edit/(:any)', 'BlogsController::edit/$1'); //$1 untuk nampung parameter any
 $routes->post('/blogs/update/(:any)', 'BlogsController::update/$1');
+$routes->get('/blogs/artikel/(:any)', 'BlogsController::detail/$1');
+
+//user routes
+
+$routes->get('/blogs/register', 'UserController::register');
+$routes->post('/blogs/saveRegister', 'UserController::saveRegister');
+
+$routes->get('/blogs/login', 'UserController::login');
+
 /*
  * --------------------------------------------------------------------
  * Additional Routing

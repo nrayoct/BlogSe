@@ -16,6 +16,7 @@ class BlogsController extends BaseController
     {   //untuk ngakses
         $blog = $this->BlogModel->findAll(); //untuk nyambungin ke model, untuk pke fungsi yg ada di basemodel. 
         $data = [
+            'title' => "Blog - Blog",
             'tampilblog' => $blog
             //menggunakan findall untuk ambil dan tampil semua data. salah satu fungsi dr basemodel
         ];
@@ -27,45 +28,74 @@ class BlogsController extends BaseController
         $blog = $this->BlogModel->findAll();
         $data = [
             'title' => "Blog - Home",
-            'tampilblog' => $blog,
+            'tampilblog' => $blog
         ];
         //closure : ini kalo ga ada controller
-        echo view('layout/header', $data);
-        echo view('v_home');
-        echo view('layout/footer');
+        echo view('v_home', $data);
+    }
+
+    public function detail($slug)
+    {
+        //divideo wpu model part 2 menit ke 3.50
+        //ngambil slug
+        $blog = $this->BlogModel->getBlog($slug);
+        $data = [
+            'title' => "Blog - Detail",
+            'tampilblog' => $blog
+        ];
+
+        //jika artikel tidak ada
+        if (empty($data['tampilblog'])) {
+            throw new \CodeIgniter\Exceptions\PageNotFoundException('Article ' . $slug . ' not found.');
+        }
+        return view('v_detailblog', $data);
     }
 
     public function tambahblog()
     {
-        session();
+        session(); //jalanin fungsi session untuk ambil validasi yang tadi
         $data = [
             'validation' => \Config\Services::validation(),
             'title' => "Blog - Kelola Blog"
         ];
         //untuk nampilin form tambah blog/isi artikel
-
-        echo view('layout/header', $data);
-        echo view('v_tambahblog');
-        echo view('layout/footer');
+        echo view('v_tambahblog', $data);
     }
 
     public function posting()
     {
+        //validasi input
+        if (!$this->validate([
+            'judul' => [
+                'rules' => 'required|is_unique[blogs.judul]',
+                'errors' => [
+                    'required' => '{field} artikel harus diisi!',
+                    'is_unique' => '{field} artikel sudah terdaftar!'
+                ]
+            ],
+            'isi' => [
+                'rules' => 'required',
+                'errors' => [
+                    'required' => '{field} artikel harus diisi!'
+                ]
+            ]
+        ])) {
+            $validation = \Config\Services::validation();
 
-        $data = [
-            'judul' => $this->request->getpost('judul'),
-            //getPost ini utk ambil data dari item POST yng ada di form v_blog
-            'slug' => $this->request->getpost('slug'),
-            'isi' => $this->request->getpost('isi'),
-        ];
-        $blog = new BlogModel();
-        //gunakan insert untuk masukin data ke database. bawaan dri basemodel
-        $post = $blog->insert($data);
-        if ($post) {
-            session()->setFlashdata('message', 'Post Has Been Added');
-            session()->setFlashdata('alert-class', 'alert-success');
-            return redirect()->to('/blogs');
+            return redirect()->to('/blogs/tambahblog')->withInput()->with('validation', $validation);
         }
+
+
+        $slug = url_title($this->request->getVar('judul'), '-', true);
+        $this->BlogModel->save([
+            'judul' => $this->request->getVar('judul'),
+            //getPost ini utk ambil data dari item POST yng ada di form v_blog
+            'slug' => $slug,
+            'isi' => $this->request->getVar('isi')
+        ]);
+        session()->setFlashdata('message', 'Post Has Been Added');
+        session()->setFlashdata('alert-class', 'alert-success');
+        return redirect()->to('/blogs');
     }
     //membuat dan mengarahkan button hapus. 
     public function delete($slug)
@@ -81,21 +111,54 @@ class BlogsController extends BaseController
 
     public function edit($slug)
     {
-
+        session();
         $data = [
             'title' => "Blog - Edit Blog",
+            'validation' => \Config\Services::validation(),
             'tampilblog' => $this->BlogModel->getBlog($slug)
         ];
-        echo view('layout/header', $data);
         echo view('v_editblogs', $data);
-        echo view('layout/footer');
     }
 
-    public function update($slug)
+    public function update($blog_id)
     {
-        $blog = model("BlogModel");
-        $data = $this->request->getPost();
-        $blog->update($slug, $data);
+        //cek judul
+        $blogLama = $this->BlogModel->getBlog($this->request->getVar('slug'));
+        if ($blogLama['judul'] == $this->request->getVar('judul')) {
+            $rule_judul = 'required';
+        } else {
+            $rule_judul = 'required|is_unique[blogs.judul]';
+        }
+
+        //validasi input
+        if (!$this->validate([
+            'judul' => [
+                'rules' => $rule_judul,
+                'errors' => [
+                    'required' => '{field} artikel harus diisi!',
+                    'is_unique' => '{field} artikel sudah terdaftar!'
+                ]
+            ],
+            'isi' => [
+                'rules' => 'required',
+                'errors' => [
+                    'required' => '{field} artikel harus diisi!'
+                ]
+            ]
+        ])) {
+            $validation = \Config\Services::validation();
+
+            return redirect()->to('/blogs/edit/' . $this->request->getVar('slug'))->withInput()->with('validation', $validation);
+        }
+
+        $slug = url_title($this->request->getVar('judul'), '-', true);
+        $this->BlogModel->save([
+            'blog_id' => $blog_id,
+            'judul' => $this->request->getVar('judul'),
+            //getPost ini utk ambil data dari item POST yng ada di form v_blog
+            'slug' => $slug,
+            'isi' => $this->request->getVar('isi')
+        ]);
         session()->setFlashdata('message', 'Post Has Been Updated');
         session()->setFlashdata('alert-class', 'alert-success');
         return redirect()->to('/blogs');
